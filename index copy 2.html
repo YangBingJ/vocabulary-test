@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片辨識練習</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .images {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .images img {
+            margin: 0 10px;
+            width: 200px;
+            height: auto;
+            cursor: pointer;
+        }
+        .play-button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .congratulations {
+            display: none;
+            font-size: 24px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="images">
+            <img id="image1" src="" alt="Image 1" onclick="checkAnswer(0)">
+            <img id="image2" src="" alt="Image 2" onclick="checkAnswer(1)">
+        </div>
+        <button class="play-button" onclick="playAudio()">播放單字</button>
+        <div class="score" id="score"></div>
+        <div class="wrong-answers" id="wrong-answers"></div>
+        <div class="congratulations" id="congratulations">恭喜全部答對！</div>
+    </div>
+    <script type="module">
+        import { images } from './data.js';
+
+        const correctSound = new Audio('correct.mp3');
+        const wrongSound = new Audio('wrong.mp3');
+
+        let correctAnswer;
+        let score = 0;
+        let wrongAnswers = 0;
+        let correctAnsweredImages = new Set();
+
+        function getRandomImages() {
+            let availableImages = images.filter(image => !correctAnsweredImages.has(image.name));
+            if (availableImages.length < 2) {
+                availableImages = images; // 如果所有圖片都答對過了，重新開始使用所有圖片
+            }
+            const shuffledImages = availableImages.sort(() => 0.5 - Math.random());
+            document.getElementById('image1').src = shuffledImages[0].src;
+            document.getElementById('image2').src = shuffledImages[1].src;
+            return shuffledImages[Math.floor(Math.random() * 2)];
+        }
+
+        function playAudio() {
+            const audio = new Audio(correctAnswer.audio);
+            audio.play();
+        }
+
+        function checkAnswer(selectedIndex) {
+            const selectedImageSrc = document.getElementById(`image${selectedIndex + 1}`).src;
+            if (selectedImageSrc.includes(correctAnswer.src)) {
+                score++;
+                correctAnsweredImages.add(correctAnswer.name);
+                correctSound.play();
+            } else {
+                wrongAnswers++;
+                wrongSound.play();
+            }
+            updateScore();
+
+            setTimeout(() => {
+                if (correctAnsweredImages.size === images.length) {
+                    showCongratulations();
+                } else {
+                    correctAnswer = getRandomImages();
+                    playAudio(); // 播放新的音頻
+                }
+            }, 1000); // 延遲1秒確保音效播放完成
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerText = `正確: ${score}`;
+            document.getElementById('wrong-answers').innerText = `錯誤: ${wrongAnswers}`;
+        }
+
+        function showCongratulations() {
+            document.querySelector('.images').style.display = 'none';
+            document.querySelector('.play-button').style.display = 'none';
+            document.getElementById('congratulations').style.display = 'block';
+        }
+
+        function initialize() {
+            correctAnswer = getRandomImages();
+            updateScore();
+            playAudio();
+        }
+
+        window.onload = initialize;
+    </script>
+</body>
+</html>

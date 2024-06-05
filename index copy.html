@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片辨識練習</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .images {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .images img {
+            margin: 0 10px;
+            width: 200px;
+            height: auto;
+            cursor: pointer;
+        }
+        .play-button {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .score {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .congratulations {
+            display: none;
+            font-size: 24px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="images">
+            <img id="image1" src="" alt="Image 1" onclick="checkAnswer(0)">
+            <img id="image2" src="" alt="Image 2" onclick="checkAnswer(1)">
+        </div>
+        <button class="play-button" onclick="playAudio()">播放單字</button>
+        <div class="score" id="score"></div>
+        <div class="wrong-answers" id="wrong-answers"></div>
+        <div class="congratulations" id="congratulations">恭喜全部答對！</div>
+    </div>
+    <script>
+        const images = [
+        { src: 'actor.svg', audio: 'actor.mp3', name: 'actor' },
+        { src: 'actress.svg', audio: 'actress.mp3', name: 'actress' },
+        { src: 'alarm-clock.svg', audio: 'alarm-clock.mp3', name: 'alarm-clock' },
+        { src: 'album.svg', audio: 'album.mp3', name: 'album' },
+        { src: 'art.svg', audio: 'art.mp3', name: 'art' },
+        { src: 'artist.svg', audio: 'artist.mp3', name: 'artist' },
+        { src: 'astronaut.svg', audio: 'astronaut.mp3', name: 'astronaut' },
+        { src: 'author.svg', audio: 'author.mp3', name: 'author' },
+        { src: 'backpack.svg', audio: 'backpack.mp3', name: 'backpack' },
+        { src: 'bag.svg', audio: 'bag.mp3', name: 'bag' },
+        { src: 'baker.svg', audio: 'baker.mp3', name: 'baker' },
+        { src: 'ball.svg', audio: 'ball.mp3', name: 'ball' },
+        { src: 'bath.svg', audio: 'bath.mp3', name: 'bath' },
+        { src: 'battery.svg', audio: 'battery.mp3', name: 'battery' },
+        { src: 'beach.svg', audio: 'beach.mp3', name: 'beach' },
+        { src: 'bed.svg', audio: 'bed.mp3', name: 'bed' },
+        { src: 'bicycle.svg', audio: 'bicycle.mp3', name: 'bicycle' },
+        { src: 'bird.svg', audio: 'bird.mp3', name: 'bird' },
+        { src: 'blanket.svg', audio: 'blanket.mp3', name: 'blanket' },
+        { src: 'boat.svg', audio: 'boat.mp3', name: 'boat' },
+        { src: 'book.svg', audio: 'book.mp3', name: 'book' },
+        { src: 'boots.svg', audio: 'boots.mp3', name: 'boots' },
+        { src: 'bracelet.svg', audio: 'bracelet.mp3', name: 'bracelet' },
+        { src: 'bridge.svg', audio: 'bridge.mp3', name: 'bridge' },
+        { src: 'bus.svg', audio: 'bus.mp3', name: 'bus' },
+        { src: 'button.svg', audio: 'button.mp3', name: 'button' },
+        { src: 'camera.svg', audio: 'camera.mp3', name: 'camera' },
+        { src: 'candle.svg', audio: 'candle.mp3', name: 'candle' },
+        { src: 'cap.svg', audio: 'cap.mp3', name: 'cap' },
+        { src: 'car.svg', audio: 'car.mp3', name: 'car' },
+        { src: 'cat.svg', audio: 'cat.mp3', name: 'cat' },
+        { src: 'ceiling.svg', audio: 'ceiling.mp3', name: 'ceiling' },
+        { src: 'charger.svg', audio: 'charger.mp3', name: 'charger' },
+        { src: 'chef.svg', audio: 'chef.mp3', name: 'chef' },
+        { src: 'clinic.svg', audio: 'clinic.mp3', name: 'clinic' },
+        { src: 'cloud.svg', audio: 'cloud.mp3', name: 'cloud' },
+        { src: 'coat.svg', audio: 'coat.mp3', name: 'coat' },
+        { src: 'computer.svg', audio: 'computer.mp3', name: 'computer' },
+        { src: 'conditioner.svg', audio: 'conditioner.mp3', name: 'conditioner' },
+        { src: 'contact-lens.svg', audio: 'contact-lens.mp3', name: 'contact-lens' },
+        { src: 'cook.svg', audio: 'cook.mp3', name: 'cook' },
+        { src: 'cord.svg', audio: 'cord.mp3', name: 'cord' },
+        { src: 'dance.svg', audio: 'dance.mp3', name: 'dance' },
+        { src: 'dark.svg', audio: 'dark.mp3', name: 'dark' },
+        { src: 'day.svg', audio: 'day.mp3', name: 'day' },
+        { src: 'director.svg', audio: 'director.mp3', name: 'director' },
+        { src: 'doctor.svg', audio: 'doctor.mp3', name: 'doctor' },
+        { src: 'dog.svg', audio: 'dog.mp3', name: 'dog' },
+        { src: 'doll.svg', audio: 'doll.mp3', name: 'doll' },
+        { src: 'door.svg', audio: 'door.mp3', name: 'door' },
+        { src: 'dress.svg', audio: 'dress.mp3', name: 'dress' },
+        { src: 'earring.svg', audio: 'earring.mp3', name: 'earring' },
+        { src: 'elevator.svg', audio: 'elevator.mp3', name: 'elevator' },
+        { src: 'family.svg', audio: 'family.mp3', name: 'family' },
+        { src: 'film.svg', audio: 'film.mp3', name: 'film' },
+        { src: 'floor.svg', audio: 'floor.mp3', name: 'floor' },
+        { src: 'flower.svg', audio: 'flower.mp3', name: 'flower' },
+        { src: 'food.svg', audio: 'food.mp3', name: 'food' },
+        { src: 'forest.svg', audio: 'forest.mp3', name: 'forest' },
+        { src: 'friend.svg', audio: 'friend.mp3', name: 'friend' },
+        { src: 'game.svg', audio: 'game.mp3', name: 'game' },
+        { src: 'garden.svg', audio: 'garden.mp3', name: 'garden' },
+        { src: 'glasses.svg', audio: 'glasses.mp3', name: 'glasses' },
+        { src: 'glove.svg', audio: 'glove.mp3', name: 'glove' },
+        { src: 'hat.svg', audio: 'hat.mp3', name: 'hat' },
+        { src: 'headphones.svg', audio: 'headphones.mp3', name: 'headphones' },
+        { src: 'health.svg', audio: 'health.mp3', name: 'health' },
+        { src: 'helmet.svg', audio: 'helmet.mp3', name: 'helmet' },
+        { src: 'home.svg', audio: 'home.mp3', name: 'home' },
+        { src: 'hospital.svg', audio: 'hospital.mp3', name: 'hospital' },
+        { src: 'house.svg', audio: 'house.mp3', name: 'house' },
+        { src: 'ice.svg', audio: 'ice.mp3', name: 'ice' },
+        { src: 'internet.svg', audio: 'internet.mp3', name: 'internet' },
+        { src: 'jacket.svg', audio: 'jacket.mp3', name: 'jacket' },
+        { src: 'jeans.svg', audio: 'jeans.mp3', name: 'jeans' },
+        { src: 'key.svg', audio: 'key.mp3', name: 'key' },
+        { src: 'lake.svg', audio: 'lake.mp3', name: 'lake' },
+        { src: 'light.svg', audio: 'light.mp3', name: 'light' },
+        { src: 'lock.svg', audio: 'lock.mp3', name: 'lock' },
+        { src: 'love.svg', audio: 'love.mp3', name: 'love' },
+        { src: 'medicine.svg', audio: 'medicine.mp3', name: 'medicine' },
+        { src: 'microphone.svg', audio: 'microphone.mp3', name: 'microphone' },
+        { src: 'mirror.svg', audio: 'mirror.mp3', name: 'mirror' },
+        { src: 'money.svg', audio: 'money.mp3', name: 'money' },
+        { src: 'moon.svg', audio: 'moon.mp3', name: 'moon' },
+        { src: 'motorcycle.svg', audio: 'motorcycle.mp3', name: 'motorcycle' },
+        { src: 'mountain.svg', audio: 'mountain.mp3', name: 'mountain' },
+        { src: 'movie.svg', audio: 'movie.mp3', name: 'movie' },
+        { src: 'music.svg', audio: 'music.mp3', name: 'music' },
+        { src: 'musician.svg', audio: 'musician.mp3', name: 'musician' },
+        { src: 'necklace.svg', audio: 'necklace.mp3', name: 'necklace' },
+        { src: 'night.svg', audio: 'night.mp3', name: 'night' },
+        { src: 'nurse.svg', audio: 'nurse.mp3', name: 'nurse' },
+        { src: 'ocean.svg', audio: 'ocean.mp3', name: 'ocean' },
+        { src: 'painter.svg', audio: 'painter.mp3', name: 'painter' },
+        { src: 'painting.svg', audio: 'painting.mp3', name: 'painting' },
+        { src: 'pants.svg', audio: 'pants.mp3', name: 'pants' },
+        { src: 'park.svg', audio: 'park.mp3', name: 'park' },
+        { src: 'patient.svg', audio: 'patient.mp3', name: 'patient' },
+        { src: 'phone.svg', audio: 'phone.mp3', name: 'phone' },
+        { src: 'photograph.svg', audio: 'photograph.mp3', name: 'photograph' },
+        { src: 'pill.svg', audio: 'pill.mp3', name: 'pill' },
+        { src: 'pillow.svg', audio: 'pillow.mp3', name: 'pillow' },
+        { src: 'plane.svg', audio: 'plane.mp3', name: 'plane' },
+        { src: 'plant.svg', audio: 'plant.mp3', name: 'plant' },
+        { src: 'playground.svg', audio: 'playground.mp3', name: 'playground' },
+        { src: 'plug.svg', audio: 'plug.mp3', name: 'plug' },
+        { src: 'poet.svg', audio: 'poet.mp3', name: 'poet' },
+        { src: 'power.svg', audio: 'power.mp3', name: 'power' },
+        { src: 'purse.svg', audio: 'purse.mp3', name: 'purse' },
+        { src: 'puzzle.svg', audio: 'puzzle.mp3', name: 'puzzle' },
+        { src: 'radio.svg', audio: 'radio.mp3', name: 'radio' },
+        { src: 'rain.svg', audio: 'rain.mp3', name: 'rain' },
+        { src: 'record.svg', audio: 'record.mp3', name: 'record' },
+        { src: 'remote.svg', audio: 'remote.mp3', name: 'remote' },
+        { src: 'ring.svg', audio: 'ring.mp3', name: 'ring' },
+        { src: 'river.svg', audio: 'river.mp3', name: 'river' },
+        { src: 'road.svg', audio: 'road.mp3', name: 'road' },
+        { src: 'rocket.svg', audio: 'rocket.mp3', name: 'rocket' },
+        { src: 'sandals.svg', audio: 'sandals.mp3', name: 'sandals' },
+        { src: 'scarf.svg', audio: 'scarf.mp3', name: 'scarf' },
+        { src: 'school.svg', audio: 'school.mp3', name: 'school' },
+        { src: 'screen.svg', audio: 'screen.mp3', name: 'screen' },
+        { src: 'shampoo.svg', audio: 'shampoo.mp3', name: 'shampoo' },
+        { src: 'sheet.svg', audio: 'sheet.mp3', name: 'sheet' },
+        { src: 'ship.svg', audio: 'ship.mp3', name: 'ship' },
+        { src: 'shirt.svg', audio: 'shirt.mp3', name: 'shirt' },
+        { src: 'shoes.svg', audio: 'shoes.mp3', name: 'shoes' },
+        { src: 'shower.svg', audio: 'shower.mp3', name: 'shower' },
+        { src: 'sink.svg', audio: 'sink.mp3', name: 'sink' },
+        { src: 'skirt.svg', audio: 'skirt.mp3', name: 'skirt' },
+        { src: 'sky.svg', audio: 'sky.mp3', name: 'sky' },
+        { src: 'slippers.svg', audio: 'slippers.mp3', name: 'slippers' },
+        { src: 'snow.svg', audio: 'snow.mp3', name: 'snow' },
+        { src: 'soap.svg', audio: 'soap.mp3', name: 'soap' },
+        { src: 'socket2.svg', audio: 'socket2.mp3', name: 'socket2' },
+        { src: 'socks.svg', audio: 'socks.mp3', name: 'socks' },
+        { src: 'song.svg', audio: 'song.mp3', name: 'song' },
+        { src: 'speaker.svg', audio: 'speaker.mp3', name: 'speaker' },
+        { src: 'stairs.svg', audio: 'stairs.mp3', name: 'stairs' },
+        { src: 'star.svg', audio: 'star.mp3', name: 'star' },
+        { src: 'street.svg', audio: 'street.mp3', name: 'street' },
+        { src: 'sun.svg', audio: 'sun.mp3', name: 'sun' },
+        { src: 'sunglasses.svg', audio: 'sunglasses.mp3', name: 'sunglasses' },
+        { src: 'sweater.svg', audio: 'sweater.mp3', name: 'sweater' },
+        { src: 'switch.svg', audio: 'switch.mp3', name: 'switch' },
+        { src: 'teddy-bear.svg', audio: 'teddy-bear.mp3', name: 'teddy-bear' },
+        { src: 'television.svg', audio: 'television.mp3', name: 'television' },
+        { src: 'theater.svg', audio: 'theater.mp3', name: 'theater' },
+        { src: 'time.svg', audio: 'time.mp3', name: 'time' },
+        { src: 'toilet.svg', audio: 'toilet.mp3', name: 'toilet' },
+        { src: 'toothpaste.svg', audio: 'toothpaste.mp3', name: 'toothpaste' },
+        { src: 'towel.svg', audio: 'towel.mp3', name: 'towel' },
+        { src: 'toy.svg', audio: 'toy.mp3', name: 'toy' },
+        { src: 'train.svg', audio: 'train.mp3', name: 'train' },
+        { src: 'tree.svg', audio: 'tree.mp3', name: 'tree' },
+        { src: 'uniform.svg', audio: 'uniform.mp3', name: 'uniform' },
+        { src: 'video.svg', audio: 'video.mp3', name: 'video' },
+        { src: 'waiter.svg', audio: 'waiter.mp3', name: 'waiter' },
+        { src: 'waitress.svg', audio: 'waitress.mp3', name: 'waitress' },
+        { src: 'wall.svg', audio: 'wall.mp3', name: 'wall' },
+        { src: 'wallet.svg', audio: 'wallet.mp3', name: 'wallet' },
+        { src: 'watch.svg', audio: 'watch.mp3', name: 'watch' },
+        { src: 'water.svg', audio: 'water.mp3', name: 'water' },
+        { src: 'window.svg', audio: 'window.mp3', name: 'window' },
+        { src: 'work.svg', audio: 'work.mp3', name: 'work' },
+        { src: 'writer.svg', audio: 'writer.mp3', name: 'writer' },
+        ];
+
+        const correctSound = new Audio('correct.mp3');
+        const wrongSound = new Audio('wrong.mp3');
+
+        let correctAnswer;
+        let score = 0;
+        let wrongAnswers = 0;
+        let correctAnsweredImages = new Set();
+
+        function getRandomImages() {
+            let availableImages = images.filter(image => !correctAnsweredImages.has(image.name));
+            if (availableImages.length < 2) {
+                availableImages = images; // 如果所有圖片都答對過了，重新開始使用所有圖片
+            }
+            const shuffledImages = availableImages.sort(() => 0.5 - Math.random());
+            document.getElementById('image1').src = shuffledImages[0].src;
+            document.getElementById('image2').src = shuffledImages[1].src;
+            return shuffledImages[Math.floor(Math.random() * 2)];
+        }
+
+        function playAudio() {
+            const audio = new Audio(correctAnswer.audio);
+            audio.play();
+        }
+
+        function checkAnswer(selectedIndex) {
+            const selectedImageSrc = document.getElementById(`image${selectedIndex + 1}`).src;
+            if (selectedImageSrc.includes(correctAnswer.src)) {
+                score++;
+                correctAnsweredImages.add(correctAnswer.name);
+                correctSound.play();
+            } else {
+                wrongAnswers++;
+                wrongSound.play();
+            }
+            updateScore();
+
+            if (correctAnsweredImages.size === images.length) {
+                showCongratulations();
+            } else {
+                correctAnswer = getRandomImages();
+                setTimeout(playAudio, 500); // 撥放新的音頻，延遲500毫秒確保音效播放完成
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerText = `正確: ${score}`;
+            document.getElementById('wrong-answers').innerText = `錯誤: ${wrongAnswers}`;
+        }
+
+        function showCongratulations() {
+            document.querySelector('.images').style.display = 'none';
+            document.querySelector('.play-button').style.display = 'none';
+            document.getElementById('congratulations').style.display = 'block';
+        }
+
+        function initialize() {
+            correctAnswer = getRandomImages();
+            updateScore();
+            playAudio();
+        }
+
+        window.onload = initialize;
+    </script>
+</body>
+</html>
